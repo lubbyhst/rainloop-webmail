@@ -25,3 +25,12 @@
 .DS_Store
 /MULTIPLY
 /include.php
+
+# Local test bytecode and CI outputs
+__pycache__/
+*.pyc
+/php-lint.txt
+/image.tar.gz
+/tested-image-id.txt
+/rainloop.spdx.json
+/SHA256SUMS

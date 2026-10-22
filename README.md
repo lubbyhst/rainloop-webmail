@@ -27,3 +27,7 @@ Information about installing the product, check the [documentation page](http://
 https://choosealicense.com/licenses/mit/
 
 Copyright (c) 2022 Rainloop Team
+
+## Maintained container fork
+
+For the PHP security fix, image build, CI checks, releases and later homelab migration, see [the container guide](docs/container.md). This is an unofficial fork; the upstream RainLoop project is archived.
