@@ -62,6 +62,8 @@ Pull requests, branch pushes and manual runs perform checks. Only successful
 **pushes to master or version tags** may publish. No registry passwords or old
 upstream GPG keys are required: the publishing job uses its scoped GITHUB_TOKEN.
 Actions and base images are pinned; Dependabot proposes updates weekly.
+Protect master with the quality and build-test checks, and restrict version-tag
+creation to release maintainers.
 
 The build job transfers the exact tested Docker image and its checksum/image ID
 to a separate publishing job. It is not rebuilt between testing and publishing.
