@@ -16,12 +16,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 FROM php-base AS runtime
-ARG VCS_REF=unknown
-LABEL org.opencontainers.image.title="RainLoop Webmail" \
-      org.opencontainers.image.description="RainLoop fork with patched PHP runtime" \
-      org.opencontainers.image.source="https://github.com/lubbyhst/rainloop-webmail" \
-      org.opencontainers.image.revision=$VCS_REF \
-      org.opencontainers.image.licenses="MIT"
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libfreetype6 libicu72 libjpeg62-turbo libonig5 libpng16-16 libzip4 \
@@ -45,6 +39,12 @@ RUN set -eu; \
     chmod -R go-w /rainloop; \
     chown -R www-data:www-data /rainloop/data
 WORKDIR /rainloop
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="RainLoop Webmail" \
+      org.opencontainers.image.description="RainLoop fork with patched PHP runtime" \
+      org.opencontainers.image.source="https://github.com/lubbyhst/rainloop-webmail" \
+      org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.licenses="MIT"
 USER www-data
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

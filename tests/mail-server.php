@@ -17,6 +17,8 @@ $emit = static function (string $line) use ($connection): void {
     fwrite($connection, $line . "\r\n");
 };
 $observed = ['authenticated' => false, 'fetched' => false, 'submitted' => false];
+$senderAccepted = false;
+$recipientAccepted = false;
 $emit($protocol === 'imap' ? '* OK [CAPABILITY IMAP4rev1] synthetic fixture' : '220 fixture ESMTP');
 while (($line = fgets($connection)) !== false) {
     $line = rtrim($line, "\r\n");
@@ -47,7 +49,7 @@ while (($line = fgets($connection)) !== false) {
             $emit('* OK [UIDNEXT 2] next');
         } elseif ($command === 'FETCH' || ($command === 'UID' && str_starts_with($arguments, 'FETCH '))) {
             $body = "Synthetic mailbox message\r\n";
-            fwrite($connection, '* 1 FETCH (UID 1 BODY[TEXT] {' . strlen($body) . "}\r\n" . $body . ")\r\n");
+            fwrite($connection, '* 1 FETCH (UID 1 RFC822.SIZE ' . strlen($body) . ' BODY[TEXT] {' . strlen($body) . "}\r\n" . $body . ")\r\n");
             $observed['fetched'] = true;
         } else {
             $emit($tag . ' BAD Unexpected command');
@@ -73,15 +75,25 @@ while (($line = fgets($connection)) !== false) {
             break;
         } elseif (!$observed['authenticated']) {
             $emit('530 Authentication required');
-        } elseif ($command === 'MAIL' || $command === 'RCPT') {
-            $emit('250 OK');
-        } elseif ($command === 'DATA') {
+        } elseif ($command === 'MAIL') {
+            $senderAccepted = $arguments === 'FROM:<user@example.test>';
+            $recipientAccepted = false;
+            $emit($senderAccepted ? '250 Sender accepted' : '550 Unexpected sender');
+        } elseif ($command === 'RCPT') {
+            $recipientAccepted = $senderAccepted && $arguments === 'TO:<recipient@example.test>';
+            $emit($recipientAccepted ? '250 Recipient accepted' : '550 Unexpected recipient');
+        } elseif ($command === 'DATA' && $senderAccepted && $recipientAccepted) {
             $emit('354 Send message');
             $message = '';
-            while (($part = fgets($connection)) !== false && $part !== ".\r\n") {
+            $terminated = false;
+            while (($part = fgets($connection)) !== false) {
+                if ($part === ".\r\n") {
+                    $terminated = true;
+                    break;
+                }
                 $message .= $part;
             }
-            $observed['submitted'] = str_contains($message, 'Subject: synthetic') && str_contains($message, 'Synthetic outgoing message');
+            $observed['submitted'] = $terminated && str_contains($message, 'Subject: synthetic') && str_contains($message, 'Synthetic outgoing message');
             $emit($observed['submitted'] ? '250 Queued synthetic message' : '554 Invalid fixture message');
         } else {
             $emit('500 Unexpected command');

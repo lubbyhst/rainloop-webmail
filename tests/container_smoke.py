@@ -98,6 +98,10 @@ class ContainerSmoke(unittest.TestCase):
     def test_mail_library_compatibility(self):
         self.assertIn("PHP mail compatibility tests passed", docker("exec", self.container, "php", "/tests/php-unit.php"))
 
+    def test_vcard_calendar_floating_point_values(self):
+        self.assertIn("vCard/calendar floating-point regression tests passed",
+                      docker("exec", self.container, "php", "/tests/vobject.php"))
+
     def test_imap_retrieval_and_smtp_submission(self):
         self.assertIn("IMAP retrieval and SMTP submission tests passed",
                       docker("exec", self.container, "php", "/tests/mail-transport.php"))

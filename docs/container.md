@@ -3,6 +3,8 @@
 This unofficial fork packages RainLoop source with **PHP 8.3.36**, which fixes
 CVE-2026-109618 and CVE-2026-109619. The PHP interpreter is fixed in the base
 image; the application source cannot repair PHP request-initialization bugs.
+The bundled Sabre vCard/calendar FLOAT property class is renamed to avoid PHP's
+reserved class name, with regression coverage preserving its values.
 Upstream RainLoop is archived. This change is not a complete security audit of
 RainLoop or its old JavaScript/PHP libraries.
 

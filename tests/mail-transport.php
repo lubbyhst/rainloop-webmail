@@ -14,6 +14,7 @@ foreach (['imap', 'smtp'] as $protocol) {
         $endpoint = trim((string) fgets($pipes[1]));
         $port = (int) substr(strrchr($endpoint, ':'), 1);
         $client = $protocol === 'imap' ? MailSo\Imap\ImapClient::NewInstance() : MailSo\Smtp\SmtpClient::NewInstance();
+        $client->SetLogger(MailSo\Log\Logger::NewInstance());
         try {
             if ($protocol === 'imap') {
                 $client->Connect('127.0.0.1', $port, MailSo\Net\Enumerations\ConnectionSecurityType::NONE);
