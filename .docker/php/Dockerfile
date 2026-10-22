@@ -1,32 +1,10 @@
-# FROM php:7.3-fpm
-# FROM php:7.4-fpm
-FROM php:8.0-fpm
-
-RUN apt-get update
-
-RUN apt-get install -y \
-	git unzip wget zip curl mlocate \
-	libmcrypt-dev libicu-dev libpcre3-dev \
-	build-essential chrpath libssl-dev \
-	libxft-dev libfreetype6 libfreetype6-dev \
-	libpng-dev libjpeg62-turbo-dev \
-	libfontconfig1 libfontconfig1-dev libzip-dev
-
-RUN pecl install mcrypt && \
-	docker-php-ext-enable mcrypt
-
-RUN docker-php-ext-configure intl && \
-	docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ && \
-	docker-php-ext-install opcache pdo_mysql zip intl gd
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-RUN curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar && chmod +x /usr/local/bin/phpunit
-
-RUN apt-get -y autoremove && apt-get clean
-
-RUN sed -i '/^;catch_workers_output/ccatch_workers_output = yes' '/usr/local/etc/php-fpm.d/www.conf'
-
+FROM php:8.3.36-fpm-bookworm@sha256:6b4641a875dd3e0f7551b2751e1f5909084856d18166af7fbb522ac230feb702
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libfreetype6-dev libicu-dev libjpeg62-turbo-dev libonig-dev libpng-dev libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j2 gd intl mbstring opcache pdo_mysql zip \
+    && rm -rf /var/lib/apt/lists/* \
+    && cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 EXPOSE 9000
-
 CMD ["php-fpm"]

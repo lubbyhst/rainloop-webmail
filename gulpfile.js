@@ -7,7 +7,7 @@ const { js, jsLint } = require('./tasks/js');
 const { css, cssLint } = require('./tasks/css');
 const { vendors } = require('./tasks/vendors');
 const { watchCss } = require('./tasks/watch');
-const { rainloop } = require('./tasks/rainloop');
+const { rainloop, rainloopBuild } = require('./tasks/rainloop');
 const { owncloud } = require('./tasks/owncloud');
 
 const clean = gulp.series(cleanStatic);
@@ -29,3 +29,6 @@ exports.watchCss = watchCss;
 exports.rainloop = gulp.series(build, rainloop);
 exports.owncloud = gulp.series(build, owncloud);
 exports.all = gulp.series(exports.rainloop, exports.owncloud);
+
+// Retain the built source tree for the production container.
+exports.container = gulp.series(build, rainloopBuild);
